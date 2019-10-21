@@ -3,7 +3,7 @@ from models.playNode import PlayNode
 from models.move import Move
 
 class BestPlayer:
-  MAX_DEPTH = 3
+  MAX_DEPTH = 4
 
   def __init__(self, color):
     self.color = color
@@ -16,11 +16,10 @@ class BestPlayer:
     start_time = time.time()
     self.generateTree(board, root)
     elapsed_time = time.time() - start_time
+    print "Total time:", elapsed_time
 
     #for pre, fill, node in RenderTree(root):
-      #print "%s%s" % (pre, node.name)
-
-    print "Time of execution:", elapsed_time
+    #  print "%s%s" % (pre, node.name)
 
     return self.getNearestCorner(board.valid_moves(self.color))
 
@@ -28,19 +27,20 @@ class BestPlayer:
     if root.depth >= self.MAX_DEPTH:
       return
 
-    nodes = [PlayNode(name="%s_X:%d_Y:%d" % (self.color, move.x, move.y), color="", move=move, parent=root) for move in board.valid_moves(self.color)]
-
     #Save current player color and switch to generate opponent moves
     current = self.color
     self.color = board._opponent(self.color)
 
-    for i in range(len(nodes)):
-      #nodes[i] = board.valid_moves(current)[i]
-      #nodes[i].name = "%s_X:%d_Y:%d" % (current, nodes[i].move.x, nodes[i].move.y)
-      #nodes[i].parent = root
+    previousMove = [0,0]
+    for move in board.valid_moves(current):
+      if move.x == previousMove[0] and move.y == previousMove[1]:
+        continue
+      node = PlayNode(name="%s_X:%d_Y:%d" % (current, move.x, move.y), color="", move=move, parent=root)
+      previousMove[0] = move.x
+      previousMove[1] = move.y
       clone = board.get_clone()
-      clone.play(nodes[i].move, current)
-      self.generateTree(clone, nodes[i])
+      clone.play(move, current)
+      self.generateTree(clone, node)
 
     #After generating opponent moves, return original color
     self.color = board._opponent(self.color)
