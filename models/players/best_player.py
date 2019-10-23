@@ -63,12 +63,15 @@ class BestPlayer:
     return retMove
 
   def heuristic(self, board):
-    p = 0.0
+    my_color = self.color
+    opp_color = board._opponent(self.color)
+    p = c = 0.0
+    
     cores = board.score()
     my_tiles = cores[0]
     opp_tiles = cores[1]
 
-    #quantidade de peças no tabuleiro
+    #qtd de pecas no tabuleiro
     if my_tiles > opp_tiles:
       p = (100.0 * my_tiles)/(my_tiles + opp_tiles)
     elif my_tiles < opp_tiles:
@@ -78,21 +81,21 @@ class BestPlayer:
 
     #quinas ocupadas
     my_tiles = opp_tiles = 0
-    if board.get_square_color(1,1) == self.color:
+    if board.get_square_color(1,1) == my_color:
       my_tiles += 1
-    elif board.get_square_color(1,1) == board._opponent(self.color):
+    elif board.get_square_color(1,1) == opp_color:
       opp_tiles += 1
-    if board.get_square_color(1,8) == self.color:
+    if board.get_square_color(1,8) == my_color:
       my_tiles += 1
-    elif board.get_square_color(1,8) == board._opponent(self.color):
+    elif board.get_square_color(1,8) == opp_color:
       opp_tiles += 1
-    if board.get_square_color(8,1) == self.color:
+    if board.get_square_color(8,1) == my_color:
       my_tiles += 1
-    elif board.get_square_color(8,1) == board._opponent(self.color):
+    elif board.get_square_color(8,1) == opp_color:
       opp_tiles += 1
-    if board.get_square_color(8,8) == self.color:
+    if board.get_square_color(8,8) == my_color:
       my_tiles += 1
-    elif board.get_square_color(8,8) == board._opponent(self.color):
+    elif board.get_square_color(8,8) == opp_color:
       opp_tiles += 1
     c = 25 * (my_tiles - opp_tiles)
 
