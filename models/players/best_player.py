@@ -65,8 +65,9 @@ class BestPlayer:
   def heuristic(self, board):
     my_color = self.color
     opp_color = board._opponent(self.color)
-    p = c = 0.0
-    
+    empty = '.'
+    p = c = l = m = 0.0
+
     cores = board.score()
     my_tiles = cores[0]
     opp_tiles = cores[1]
@@ -99,7 +100,76 @@ class BestPlayer:
       opp_tiles += 1
     c = 25 * (my_tiles - opp_tiles)
 
-    score = (10 * p) + (801.724 * c)
+    #prximidade das quinas
+    my_tiles = opp_tiles
+    if board.get_square_color(1,1) == empty:
+      if board.get_square_color(1,2) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(1,2) == opp_color:
+        opp_tiles += 1
+      if board.get_square_color(2,2) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(2,2) == opp_color:
+        opp_tiles += 1
+      if board.get_square_color(2,1) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(2,1) == opp_color:
+        opp_tiles += 1
+
+    if board.get_square_color(1,8) == empty:
+      if board.get_square_color(1,7) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(1,7) == opp_color:
+        opp_tiles += 1
+      if board.get_square_color(2,7) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(2,7) == opp_color:
+        opp_tiles += 1
+      if board.get_square_color(2,8) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(2,8) == opp_color:
+        opp_tiles += 1
+    
+    if board.get_square_color(8,1) == empty:
+      if board.get_square_color(8,2) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(8,2) == opp_color:
+        opp_tiles += 1
+      if board.get_square_color(7,2) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(7,2) == opp_color:
+        opp_tiles += 1
+      if board.get_square_color(7,1) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(7,1) == opp_color:
+        opp_tiles += 1      
+    
+    if board.get_square_color(8,8) == empty:
+      if board.get_square_color(7,8) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(7,8) == opp_color:
+        opp_tiles += 1
+      if board.get_square_color(7,7) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(7,7) == opp_color:
+        opp_tiles += 1
+      if board.get_square_color(8,7) == my_color:
+        my_tiles += 1
+      elif board.get_square_color(8,7) == opp_color:
+        opp_tiles += 1
+    l = -12.5 * (my_tiles - opp_tiles)
+
+    #mobilidade
+    my_tiles = len(board.valid_moves(my_color))
+    opp_tiles = len(board.valid_moves(opp_color))
+    if my_tiles > opp_tiles:
+      m = (100.0 * my_tiles)/(my_tiles + opp_tiles)
+    elif my_tiles < opp_tiles:
+      m = -(100.0 * opp_tiles)/(my_tiles + opp_tiles)
+    else:
+      m = 0
+
+    score = (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m)
     return score
 
   
