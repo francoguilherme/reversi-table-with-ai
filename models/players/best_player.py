@@ -3,7 +3,7 @@ from models.playNode import PlayNode
 from models.move import Move
 
 class BestPlayer:
-  MAX_DEPTH = 2
+  MAX_DEPTH = 3
 
   def __init__(self, color):
     self.color = color
@@ -26,14 +26,14 @@ class BestPlayer:
 
     elapsed_time = time.time() - start_time
 
-    #for pre, fill, node in RenderTree(root):
-    #  if node==root:
-    #    print "%s%s = %f" % (pre, node.name, node.value)
-    #  else:
-    #    if node.value != None:
-    #      print "%s%s_X:%d_Y:%d = %f" % (pre, node.color, node.move.x, node.move.y, node.value)
-    #    else:
-    #      print "%s%s_X:%d_Y:%d" % (pre, node.color, node.move.x, node.move.y)
+    for pre, fill, node in RenderTree(root):
+      if node==root:
+        print "%s%s = %f" % (pre, node.name, node.value)
+      else:
+        if node.value != None:
+          print "%s%s_X:%d_Y:%d = %f" % (pre, node.color, node.move.x, node.move.y, node.value)
+        else:
+          print "%s%s_X:%d_Y:%d" % (pre, node.color, node.move.x, node.move.y)
     print "Total time:", elapsed_time
 
     return bestMove
@@ -191,23 +191,10 @@ class BestPlayer:
       m = 0
 
     score = (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m)
-    return score
-
-  def getNearestCorner(self, moves):
-    import math
-    corners = [[1,1],[1,8], [8,1], [8,8]]
-    minDist = 10
-    retMove = None
-    for move in moves:
-      for corner in corners:
-        distX = abs(corner[0] - move.x)
-        distY = abs(corner[1] - move.y)
-        dist  = math.sqrt(distX*distX + distY*distY)
-        if dist < minDist:
-          minDist = dist
-          retMove = move
-
-    return retMove
+    if my_color == 'o':
+      return -score
+    else:
+      return score
 
   def getNearestCorner(self, moves):
     import math
