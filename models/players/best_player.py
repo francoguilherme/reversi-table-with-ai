@@ -3,7 +3,7 @@ from models.playNode import PlayNode
 from models.move import Move
 
 class BestPlayer:
-  MAX_DEPTH = 3
+  MAX_DEPTH = 2
 
   def __init__(self, color):
     self.color = color
@@ -57,13 +57,17 @@ class BestPlayer:
       clone = board.get_clone()
       clone.play(move, current)
       self.generateTree(clone, node)
+    
+    if root.is_leaf:
+      #Significa que oponente nao tem jogadas, entao se calcula a heuristica desse no tambem
+      root.value = self.heuristic(board)
 
     #After generating opponent moves, return original color
     self.color = board._opponent(self.color)
 
   def negamaxAlfaBeta(self, node, alfa, beta, player):
 
-    if node.depth == self.MAX_DEPTH:
+    if node.is_leaf:
       return player * node.value
     value = -float("inf")
 
