@@ -2,8 +2,9 @@ from anytree import RenderTree
 from models.playNode import PlayNode
 from models.move import Move
 
+
 class BestPlayer:
-  MAX_DEPTH = 3
+  MAX_DEPTH = 4
 
   def __init__(self, color):
     self.color = color

@@ -3,15 +3,18 @@ from models.playNode import PlayNode
 from models.move import Move
 
 class MobilityPlayer:
-  MAX_DEPTH = 3
+  from time import time
+
+  MAX_DEPTH = 4
+  TIME_LIMIT = 3.0
 
   def __init__(self, color):
     self.color = color
+    self.start_time = 0
+    self.elapsed_time = 0
 
   def play(self, board):
-    import time
-
-    start_time = time.time()
+    self.start_time = self.time()
 
     root = PlayNode(name="root", color="")    
     self.generateTree(board, root)
@@ -24,7 +27,7 @@ class MobilityPlayer:
     candidates=[child.move for child in root.children if child.value == root.value]
     bestMove = self.getNearestCorner(candidates)
 
-    elapsed_time = time.time() - start_time
+    self.elapsed_time = self.time() - self.start_time
 
     #for pre, fill, node in RenderTree(root):
     #  if node==root:
@@ -34,12 +37,12 @@ class MobilityPlayer:
     #      print "%s%s_X:%d_Y:%d = %f" % (pre, node.color, node.move.x, node.move.y, node.value)
     #    else:
     #      print "%s%s_X:%d_Y:%d" % (pre, node.color, node.move.x, node.move.y)
-    print "Total time:", elapsed_time
+    print "Total time:", self.elapsed_time
 
     return bestMove
 
   def generateTree(self, board, root):
-    if root.depth >= self.MAX_DEPTH:
+    if root.depth >= self.MAX_DEPTH or self.time() - self.start_time >= self.TIME_LIMIT*0.95:  # Corte de tempo com margem de erro
       root.value = self.heuristic(board)
       return
 
