@@ -2,7 +2,7 @@ from anytree import RenderTree
 from models.playNode import PlayNode
 from models.move import Move
 
-class PlayerMobility:
+class MobilityPlayer:
   MAX_DEPTH = 3
 
   def __init__(self, color):
