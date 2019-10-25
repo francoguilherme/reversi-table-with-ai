@@ -5,7 +5,7 @@ from models.move import Move
 class MobilityPlayer:
   from time import time
 
-  MAX_DEPTH = 4
+  MAX_DEPTH = 3
   TIME_LIMIT = 3.0
 
   def __init__(self, color):
@@ -42,7 +42,7 @@ class MobilityPlayer:
     return bestMove
 
   def generateTree(self, board, root):
-    if root.depth >= self.MAX_DEPTH or self.time() - self.start_time >= self.TIME_LIMIT*0.95:  # Corte de tempo com margem de erro
+    if root.depth >= self.MAX_DEPTH: #or self.time() - self.start_time >= self.TIME_LIMIT*0.95:  # Corte de tempo com margem de erro
       root.value = self.heuristic(board)
       return
 
@@ -90,19 +90,35 @@ class MobilityPlayer:
     my_color = self.color
     opp_color = board._opponent(self.color)
     empty = '.'
-    p = c = l = m = 0.0
+    qtd_pecas = quinas_ocupadas = quinas_proximas = mobilidade = valor_peca_estatico = 0.0
 
     cores = board.score()
     my_tiles = cores[0]
     opp_tiles = cores[1]
 
     #qtd de pecas no tabuleiro
-    if my_tiles > opp_tiles:
-      p = (100.0 * my_tiles)/(my_tiles + opp_tiles)
-    elif my_tiles < opp_tiles:
-      p = -(100.0 * opp_tiles)/(my_tiles + opp_tiles)
-    else:
-      p = 0
+    qtd_pecas = 100 * (my_tiles - opp_tiles) / (my_tiles + opp_tiles)
+
+    #valores de cada peca no tabuleiro
+    peso_estatico_das_pecas = [
+        [4, -3, 2, 2, 2, 2, -3, 4],
+        [-3, -4, -1 -1, -1, -1, -1, -4, -3],
+        [2, -1, 1, 0, 0, 1, -1, 2],
+        [2, -1, 0, 1, 1, 0, -1, 2],
+        [2, -1, 0, 1, 1, 0, -1, 2],
+        [2, -1, 1, 0, 0, 1, -1, 2],
+        [-3, -4, -1, -1, -1, -1, -4, -3],
+        [4, -3, 2, 2, 2, 2, -3, 4]
+    ]
+
+    my_tiles = opp_tiles = 0
+    for i in range(0,8):
+        for j in range(0,8):
+            if board.get_square_color(i+1,j+1) == my_color:
+                my_tiles += 1
+            elif board.get_square_color(i+1,j+1) == opp_color:
+                opp_tiles += 1
+    valor_peca_estatico = my_tiles - opp_tiles
 
     #quinas ocupadas
     my_tiles = opp_tiles = 0
@@ -122,7 +138,7 @@ class MobilityPlayer:
       my_tiles += 1
     elif board.get_square_color(8,8) == opp_color:
       opp_tiles += 1
-    c = 25 * (my_tiles - opp_tiles)
+    quinas_ocupadas = 25 * (my_tiles - opp_tiles)
 
     #prximidade das quinas
     my_tiles = opp_tiles
@@ -181,19 +197,18 @@ class MobilityPlayer:
         my_tiles += 1
       elif board.get_square_color(8,7) == opp_color:
         opp_tiles += 1
-    l = -12.5 * (my_tiles - opp_tiles)
+    quinas_proximas = -12.5 * (my_tiles - opp_tiles)
 
     #mobilidade
     my_tiles = len(board.valid_moves(my_color))
     opp_tiles = len(board.valid_moves(opp_color))
-    if my_tiles > opp_tiles:
-      m = (100.0 * my_tiles)/(my_tiles + opp_tiles)
-    elif my_tiles < opp_tiles:
-      m = -(100.0 * opp_tiles)/(my_tiles + opp_tiles)
+    if my_tiles + opp_tiles != 0:
+        mobilidade = 100 * (my_tiles - opp_tiles) / (my_tiles + opp_tiles)
     else:
-      m = 0
+        mobilidade = 0
 
-    score = (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m)
+    score = (25 * qtd_pecas) + (30 *(quinas_ocupadas + quinas_proximas)) + (5 * mobilidade) + valor_peca_estatico
+
     if my_color == 'o':
       return -score
     else:
