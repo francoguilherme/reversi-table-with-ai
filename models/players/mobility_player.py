@@ -93,8 +93,12 @@ class MobilityPlayer:
     qtd_pecas = quinas_ocupadas = quinas_proximas = mobilidade = valor_peca_estatico = 0.0
 
     cores = board.score()
-    my_tiles = cores[0]
-    opp_tiles = cores[1]
+    if my_color == board.BLACK:
+      my_tiles = cores[1]
+      opp_tiles = cores[0]
+    elif my_color == board.WHITE:
+      my_tiles = cores[0]
+      opp_tiles = cores[1]
 
     #qtd de pecas no tabuleiro
     qtd_pecas = 100 * (my_tiles - opp_tiles) / (my_tiles + opp_tiles)
@@ -200,8 +204,9 @@ class MobilityPlayer:
     quinas_proximas = -12.5 * (my_tiles - opp_tiles)
 
     #mobilidade
-    my_tiles = len(board.valid_moves(my_color))
-    opp_tiles = len(board.valid_moves(opp_color))
+    count = self.count_valid_moves(board, my_color)
+    my_tiles = count[0]
+    opp_tiles = count[1]
     if my_tiles + opp_tiles != 0:
         mobilidade = 100 * (my_tiles - opp_tiles) / (my_tiles + opp_tiles)
     else:
@@ -213,6 +218,25 @@ class MobilityPlayer:
       return -score
     else:
       return score
+
+  def count_valid_moves(self, board, color):
+    my_count = 0
+    opp_count = 0
+    for i in range(1, 9):
+      for j in range(1, 9):
+        if board.board[i][j] == board.EMPTY:
+          for direction in board.DIRECTIONS:
+            move = Move(i, j)
+
+            my_bracket = board._find_bracket(move, color, direction)
+            if my_bracket:
+              my_count += 1
+
+            opp_bracket = board._find_bracket(move, board._opponent(color), direction)
+            if opp_bracket:
+              opp_count += 1
+
+    return [my_count, opp_count]
 
   def getNearestCorner(self, moves):
     import math
