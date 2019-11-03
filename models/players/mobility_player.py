@@ -6,7 +6,7 @@ class MobilityPlayer:
   from time import time
 
   MAX_DEPTH = 3
-  TIME_LIMIT = 3.0
+  TIME_LIMIT = 1.0
 
   def __init__(self, color):
     self.color = color
@@ -14,10 +14,10 @@ class MobilityPlayer:
     self.elapsed_time = 0
 
   def play(self, board):
-    self.start_time = self.time()
+    start_time = self.time()
 
     root = PlayNode(name="root", color="")    
-    self.generateTree(board, root)
+    self.generateTree(board, root, start_time)
     
     if self.color == board.BLACK:
       root.value = self.negamaxAlfaBeta(root, -float("inf"), float("inf"), 1)
@@ -27,46 +27,55 @@ class MobilityPlayer:
     candidates=[child.move for child in root.children if child.value == root.value]
     bestMove = self.getNearestCorner(candidates)
 
-    self.elapsed_time = self.time() - self.start_time
+    self.elapsed_time = self.time() - start_time
 
-    #for pre, fill, node in RenderTree(root):
-    #  if node==root:
-    #    print "%s%s = %f" % (pre, node.name, node.value)
-    #  else:
-    #    if node.value != None:
-    #      print "%s%s_X:%d_Y:%d = %f" % (pre, node.color, node.move.x, node.move.y, node.value)
-    #    else:
-    #      print "%s%s_X:%d_Y:%d" % (pre, node.color, node.move.x, node.move.y)
+    for pre, fill, node in RenderTree(root):
+      if node==root:
+        print "%s%s = %f" % (pre, node.name, node.value)
+      else:
+        if node.value != None:
+          print "%s%s_X:%d_Y:%d = %f" % (pre, node.color, node.move.x, node.move.y, node.value)
+        else:
+          print "%s%s_X:%d_Y:%d" % (pre, node.color, node.move.x, node.move.y)
     print "Total time:", self.elapsed_time
 
     return bestMove
 
-  def generateTree(self, board, root):
-    if root.depth >= self.MAX_DEPTH: #or self.time() - self.start_time >= self.TIME_LIMIT*0.95:  # Corte de tempo com margem de erro
-      root.value = self.heuristic(board)
-      return
-
-    #Save current player color and switch to generate opponent moves
-    current = self.color
-    self.color = board._opponent(self.color)
-
+  def generateTree(self, board, root, start_time):   
+    fila = []
     previousMove = [0,0]
-    for move in board.valid_moves(current):
+
+    #Cria filhos do no inicial e adiciona na fila
+    for move in board.valid_moves(self.color):
       if move.x == previousMove[0] and move.y == previousMove[1]:
         continue
-      node = PlayNode(color=self.color, move=move, parent=root)
+      node = PlayNode(color=board._opponent(self.color), move=move, board=board.get_clone(), parent=root)
       previousMove[0] = move.x
       previousMove[1] = move.y
-      clone = board.get_clone()
-      clone.play(move, current)
-      self.generateTree(clone, node)
-    
-    if root.is_leaf:
-      #Significa que oponente nao tem jogadas, entao se calcula a heuristica desse no tambem
-      root.value = self.heuristic(board)
+      fila.append(node)
 
-    #After generating opponent moves, return original color
-    self.color = board._opponent(self.color)
+    while len(fila):
+      #if self.time() - start_time >= self.TIME_LIMIT*0.95 or (len(root.descendants) * root.height) > 500:
+      #  break
+      if root.height >= 3:
+        break
+
+      play = fila.pop(0)
+      clone = play.board.get_clone()
+      
+      clone.play(play.move, play.color)
+      print len(clone.valid_moves(board._opponent(play.color)))
+      
+      for move in clone.valid_moves(board._opponent(play.color)):
+        if move.x == previousMove[0] and move.y == previousMove[1]:
+          continue
+        node = PlayNode(color=board._opponent(play.color), move=move, board=clone, parent=play)
+        previousMove[0] = move.x
+        previousMove[1] = move.y
+        fila.append(node)
+    
+    for leaf in root.leaves:
+      leaf.value = self.heuristic(leaf.board)
 
   def negamaxAlfaBeta(self, node, alfa, beta, player):
 

@@ -3,7 +3,7 @@ from models.playNode import PlayNode
 from models.move import Move
 
 class BestPlayer:
-  MAX_DEPTH = 3
+  MAX_DEPTH = 4
 
   def __init__(self, color):
     self.color = color
@@ -87,141 +87,121 @@ class BestPlayer:
     my_color = self.color
     opp_color = board._opponent(self.color)
     empty = '.'
-    p = c = l = m = 0.0
+    qtd_pecas = quinas_ocupadas = quinas_proximas = mobilidade = valor_peca_estatico = 0.0
 
     cores = board.score()
-    my_tiles = cores[0]
-    opp_tiles = cores[1]
+    if my_color == board.BLACK:
+      my_tiles = cores[1]
+      opp_tiles = cores[0]
+    elif my_color == board.WHITE:
+      my_tiles = cores[0]
+      opp_tiles = cores[1]
 
     #qtd de pecas no tabuleiro
-    if my_tiles > opp_tiles:
-      p = (100.0 * my_tiles)/(my_tiles + opp_tiles)
-    elif my_tiles < opp_tiles:
-      p = -(100.0 * opp_tiles)/(my_tiles + opp_tiles)
-    else:
-      p = 0
+    qtd_pecas = 100 * (my_tiles - opp_tiles) / (my_tiles + opp_tiles)
+
+    #valores de cada peca no tabuleiro
+    peso_estatico_das_pecas = [
+        [4, -3, 2, 2, 2, 2, -3, 4],
+        [-3, -4, -1 -1, -1, -1, -1, -4, -3],
+        [2, -1, 1, 0, 0, 1, -1, 2],
+        [2, -1, 0, 1, 1, 0, -1, 2],
+        [2, -1, 0, 1, 1, 0, -1, 2],
+        [2, -1, 1, 0, 0, 1, -1, 2],
+        [-3, -4, -1, -1, -1, -1, -4, -3],
+        [4, -3, 2, 2, 2, 2, -3, 4]
+    ]
+
+    my_tiles = opp_tiles = 0
+    for i in range(0,8):
+        for j in range(0,8):
+            if board.get_square_color(i+1,j+1) == my_color:
+                my_tiles += 1
+            elif board.get_square_color(i+1,j+1) == opp_color:
+                opp_tiles += 1
+    valor_peca_estatico = my_tiles - opp_tiles
 
     #quinas ocupadas
     my_tiles = opp_tiles = 0
-
-    boarColor = board.get_square_color(1,1)
-    if boarColor == my_color:
+    if board.get_square_color(1,1) == my_color:
       my_tiles += 1
-    elif boarColor == opp_color:
+    elif board.get_square_color(1,1) == opp_color:
       opp_tiles += 1
-
-    boarColor = board.get_square_color(1,8)
-    if boarColor == my_color:
+    if board.get_square_color(1,8) == my_color:
       my_tiles += 1
-    elif boarColor == opp_color:
+    elif board.get_square_color(1,8) == opp_color:
       opp_tiles += 1
-
-    boarColor = board.get_square_color(8,1)
-    if boarColor == my_color:
+    if board.get_square_color(8,1) == my_color:
       my_tiles += 1
-    elif boarColor == opp_color:
+    elif board.get_square_color(8,1) == opp_color:
       opp_tiles += 1
-
-    boarColor = board.get_square_color(8,8)
-    if boarColor == my_color:
+    if board.get_square_color(8,8) == my_color:
       my_tiles += 1
-    elif boarColor == opp_color:
+    elif board.get_square_color(8,8) == opp_color:
       opp_tiles += 1
-    c = 25 * (my_tiles - opp_tiles)
+    quinas_ocupadas = 25 * (my_tiles - opp_tiles)
 
     #prximidade das quinas
     my_tiles = opp_tiles
     if board.get_square_color(1,1) == empty:
-
-      boarColor = board.get_square_color(1,2)
-      if boarColor == my_color:
+      if board.get_square_color(1,2) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(1,2) == opp_color:
         opp_tiles += 1
-
-      boarColor = board.get_square_color(2,2)
-      if boarColor == my_color:
+      if board.get_square_color(2,2) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(2,2) == opp_color:
         opp_tiles += 1
-
-      boarColor = board.get_square_color(2,1)
-      if boarColor == my_color:
+      if board.get_square_color(2,1) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(2,1) == opp_color:
         opp_tiles += 1
 
     if board.get_square_color(1,8) == empty:
-      boarColor = board.get_square_color(1,7)
-      if boarColor == my_color:
+      if board.get_square_color(1,7) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(1,7) == opp_color:
         opp_tiles += 1
-
-      boarColor = board.get_square_color(2,7)
-      if boarColor == my_color:
+      if board.get_square_color(2,7) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(2,7) == opp_color:
         opp_tiles += 1
-
-      boarColor = board.get_square_color(2,8)
-      if boarColor == my_color:
+      if board.get_square_color(2,8) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(2,8) == opp_color:
         opp_tiles += 1
     
     if board.get_square_color(8,1) == empty:
-
-      boarColor = board.get_square_color(8,2)
-      if boarColor == my_color:
+      if board.get_square_color(8,2) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(8,2) == opp_color:
         opp_tiles += 1
-
-      boarColor = board.get_square_color(7,2)
-      if boarColor == my_color:
+      if board.get_square_color(7,2) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(7,2) == opp_color:
         opp_tiles += 1
-
-      boarColor = board.get_square_color(7,1)
-      if boarColor == my_color:
+      if board.get_square_color(7,1) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(7,1) == opp_color:
         opp_tiles += 1      
     
     if board.get_square_color(8,8) == empty:
-
-      boarColor = board.get_square_color(7,8)
-      if boarColor == my_color:
+      if board.get_square_color(7,8) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(7,8) == opp_color:
         opp_tiles += 1
-
-      boarColor = board.get_square_color(7,7)
-      if boarColor == my_color:
+      if board.get_square_color(7,7) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(7,7) == opp_color:
         opp_tiles += 1
-
-      boarColor = board.get_square_color(8,7)
-      if boarColor == my_color:
+      if board.get_square_color(8,7) == my_color:
         my_tiles += 1
-      elif boarColor == opp_color:
+      elif board.get_square_color(8,7) == opp_color:
         opp_tiles += 1
-    l = -12.5 * (my_tiles - opp_tiles)
+    quinas_proximas = -12.5 * (my_tiles - opp_tiles)
 
-    #mobilidade
-    #my_tiles = len(board.valid_moves(my_color))
-    #opp_tiles = len(board.valid_moves(opp_color))
-    #if my_tiles > opp_tiles:
-    #  m = (100.0 * my_tiles)/(my_tiles + opp_tiles)
-    #elif my_tiles < opp_tiles:
-    #  m = -(100.0 * opp_tiles)/(my_tiles + opp_tiles)
-    #else:
-    #  m = 0
+    score = (25 * qtd_pecas) + (30 *(quinas_ocupadas + quinas_proximas)) + valor_peca_estatico
 
-    score = (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m)
     if my_color == 'o':
       return -score
     else:
