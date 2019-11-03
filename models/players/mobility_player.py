@@ -34,10 +34,12 @@ class MobilityPlayer:
         print "%s%s = %f" % (pre, node.name, node.value)
       else:
         if node.value != None:
-          print "%s%s_X:%d_Y:%d = %f" % (pre, node.color, node.move.x, node.move.y, node.value)
+         print "%s%s_X:%d_Y:%d = %f" % (pre, node.color, node.move.x, node.move.y, node.value)
         else:
           print "%s%s_X:%d_Y:%d" % (pre, node.color, node.move.x, node.move.y)
     print "Total time:", self.elapsed_time
+    print "Max depth:", root.height
+    print "Leaves:", len(root.leaves)
 
     return bestMove
 
@@ -49,23 +51,20 @@ class MobilityPlayer:
     for move in board.valid_moves(self.color):
       if move.x == previousMove[0] and move.y == previousMove[1]:
         continue
-      node = PlayNode(color=board._opponent(self.color), move=move, board=board.get_clone(), parent=root)
+      node = PlayNode(color=self.color, move=move, board=board.get_clone(), parent=root)
       previousMove[0] = move.x
       previousMove[1] = move.y
       fila.append(node)
 
     while len(fila):
-      #if self.time() - start_time >= self.TIME_LIMIT*0.95 or (len(root.descendants) * root.height) > 500:
-      #  break
-      if root.height >= 3:
+
+      if self.time() - start_time >= self.TIME_LIMIT*0.3:
         break
 
       play = fila.pop(0)
       clone = play.board.get_clone()
-      
       clone.play(play.move, play.color)
-      print len(clone.valid_moves(board._opponent(play.color)))
-      
+
       for move in clone.valid_moves(board._opponent(play.color)):
         if move.x == previousMove[0] and move.y == previousMove[1]:
           continue
