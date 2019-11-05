@@ -3,18 +3,21 @@ from models.playNode import PlayNode
 from models.move import Move
 
 class BestPlayer:
-  MAX_DEPTH = 4
+  from time import time
+
+  MAX_DEPTH = 3
+  TIME_LIMIT = 2.9
 
   def __init__(self, color):
     self.color = color
+    self.start_time = 0
+    self.elapsed_time = 0
 
   def play(self, board):
-    import time
-
-    start_time = time.time()
+    start_time = self.time()
 
     root = PlayNode(name="root", color="")    
-    self.generateTree(board, root)
+    self.generateTree(board, root, start_time)
     
     if self.color == board.BLACK:
       root.value = self.negamaxAlfaBeta(root, -float("inf"), float("inf"), 1)
@@ -24,7 +27,7 @@ class BestPlayer:
     candidates=[child.move for child in root.children if child.value == root.value]
     bestMove = self.getNearestCorner(candidates)
 
-    elapsed_time = time.time() - start_time
+    elapsed_time = self.time() - start_time
 
     #for pre, fill, node in RenderTree(root):
     #  if node==root:
@@ -35,12 +38,14 @@ class BestPlayer:
     #    else:
     #      print "%s%s_X:%d_Y:%d" % (pre, node.color, node.move.x, node.move.y)
     print "Total time:", elapsed_time
+    #print "Max depth:", root.height
+    #print "Leaves:", len(root.leaves)
 
     return bestMove
 
-  def generateTree(self, board, root):
+  def generateTree(self, board, root, start_time):
     if root.depth >= self.MAX_DEPTH:
-      root.value = self.heuristic(board)
+      root.value = self.heuristic(board, start_time)
       return
 
     #Save current player color and switch to generate opponent moves
@@ -56,11 +61,11 @@ class BestPlayer:
       previousMove[1] = move.y
       clone = board.get_clone()
       clone.play(move, current)
-      self.generateTree(clone, node)
+      self.generateTree(clone, node, start_time)
     
     if root.is_leaf:
       #Significa que oponente nao tem jogadas, entao se calcula a heuristica desse no tambem
-      root.value = self.heuristic(board)
+      root.value = self.heuristic(board, start_time)
 
     #After generating opponent moves, return original color
     self.color = board._opponent(self.color)
@@ -83,7 +88,7 @@ class BestPlayer:
       node.value = player * value
     return value
 
-  def heuristic(self, board):
+  def heuristic(self, board, start_time):
     my_color = self.color
     opp_color = board._opponent(self.color)
     empty = '.'
@@ -200,12 +205,43 @@ class BestPlayer:
         opp_tiles += 1
     quinas_proximas = -12.5 * (my_tiles - opp_tiles)
 
-    score = (25 * qtd_pecas) + (30 *(quinas_ocupadas + quinas_proximas)) + valor_peca_estatico
+    #mobilidade
+    if (self.time() - start_time) < 2.9:
+      count = self.count_valid_moves(board, my_color)
+      my_tiles = count[0]
+      opp_tiles = count[1]
+      if my_tiles + opp_tiles != 0:
+          mobilidade = 100 * (my_tiles - opp_tiles) / (my_tiles + opp_tiles)
+      else:
+          mobilidade = 0
+    else:
+      mobilidade = 0
+
+    score = (25 * qtd_pecas) + (30 *(quinas_ocupadas + quinas_proximas)) + (5 * mobilidade) + valor_peca_estatico
 
     if my_color == 'o':
       return -score
     else:
       return score
+
+  def count_valid_moves(self, board, color):
+    my_count = 0
+    opp_count = 0
+    for i in range(1, 9):
+      for j in range(1, 9):
+        if board.board[i][j] == board.EMPTY:
+          for direction in board.DIRECTIONS:
+            move = Move(i, j)
+
+            my_bracket = board._find_bracket(move, color, direction)
+            if my_bracket:
+              my_count += 1
+
+            opp_bracket = board._find_bracket(move, board._opponent(color), direction)
+            if opp_bracket:
+              opp_count += 1
+
+    return [my_count, opp_count]
 
   def getNearestCorner(self, moves):
     import math
