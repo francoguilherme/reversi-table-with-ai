@@ -15,4 +15,4 @@ Além disso, deve se instalar o pacote [AnyTree](https://github.com/c0fec0de/any
 
 O jogador **mobility_player.py** gera a árvore de jogadas usando busca em largura e levando em conta o tempo, para que a operação toda de escolher a melhor jogada não passe de 3 segundos. Além disso, leva em conta a mobilidade (número de jogadas possíveis no tabuleiro atual) para calcular o valor da função heurística.
 
-O jogador **no_mobility_player.py** gera a árvore de jogadas usando busca em profundidade definida em profundidade 4, porém não leva em conta a mobilidade para calcular o valor da função heurística para poder economizar tempo.
+O jogador **no_mobility_player.py** gera a árvore de jogadas usando busca em profundidade definida em profundidade 3, porém não leva em conta a mobilidade para calcular o valor da função heurística, com o objetivo de economizar tempo.
