@@ -16,5 +16,6 @@ O jogador **best_player.py** gera a árvore de jogadas usando busca em profundid
 
 O jogador **largura_player.py** gera a árvore de jogadas usando busca em largura sem profundidade definida mas levando em conta o tempo, para que a operação toda de escolher a melhor jogada não passe de 3 segundos.
 
+O jogador escolhido para o campeonato é o **largura_player.py**.
 
-Os dois jogadores usam a mesma função heurística e possuem uma checagem: caso o tempo da jogada esteja chegando em 3 segundos, a mobilidade (número de jogadas possíveis a partir do tabuleiro atual) não é calculada. Isso é feito somente para garantir que não passe de 3 segundos, pois a mobilidade é cara para ser calculada.
+Os dois jogadores usam a mesma função heurística (que é uma mistura de heurísticas, cada uma com um peso) e possuem uma checagem: caso o tempo da jogada esteja chegando em 3 segundos, a mobilidade (número de jogadas possíveis a partir do tabuleiro atual) não é calculada. Isso é feito somente para garantir que não passe de 3 segundos, pois a mobilidade é cara para ser calculada.
