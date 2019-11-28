@@ -114,7 +114,7 @@ class LaarguraPlayer:
     #valores de cada peca no tabuleiro
     peso_estatico_das_pecas = [
         [4, -3, 2, 2, 2, 2, -3, 4],
-        [-3, -4, -1 -1, -1, -1, -1, -4, -3],
+        [-3, -4, -1, -1, -1, -1, -4, -3],
         [2, -1, 1, 0, 0, 1, -1, 2],
         [2, -1, 0, 1, 1, 0, -1, 2],
         [2, -1, 0, 1, 1, 0, -1, 2],
@@ -127,9 +127,9 @@ class LaarguraPlayer:
     for i in range(0,8):
         for j in range(0,8):
             if board.get_square_color(i+1,j+1) == my_color:
-                my_tiles += 1
+                my_tiles += peso_estatico_das_pecas[i][j]
             elif board.get_square_color(i+1,j+1) == opp_color:
-                opp_tiles += 1
+                opp_tiles += peso_estatico_das_pecas[i][j]
     valor_peca_estatico = my_tiles - opp_tiles
 
     #quinas ocupadas
